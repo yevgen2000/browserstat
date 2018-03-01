@@ -12,10 +12,17 @@ const schema = yup.object().shape({
   count: yup.number().positive().integer(),
 });
 
+const siteFilter = (site, name, minVis, maxVis) => (aSite => aSite) && !(
+  (name && !site.site.startsWith(name))
+    || (minVis && site.count < minVis)
+    || (maxVis && site.count > maxVis));
+
 router.get('/', (req, res) => {
-  const result = Object.values(siteStats).filter(aSite => aSite !== null);
+  const result = Object.values(siteStats)
+    .filter(aSite => siteFilter(aSite, req.query.prefix, req.query.min, req.query.max));
   res.status(200).json(result);
 });
+
 
 router.put('/', (req, res, next) => {
   schema.isValid(req.body)
