@@ -3,6 +3,7 @@ const yup = require('yup');
 
 const router = express.Router();
 const siteStats = {};
+const siteNames = {};
 let counter = 0;
 
 const schema = yup.object().shape({
@@ -27,17 +28,27 @@ router.put('/', (req, res, next) => {
 });
 
 router.put('/', (req, res) => {
-  const stat = siteStats[req.body.id];
+  let anID;
+  if (req.body.id) {
+    anID = req.body.site;
+  } else {
+    anID = siteNames[req.body.site];
+  }
+  let stat;
+  if (anID) {
+    stat = siteStats[anID];
+  }
   if (stat && stat !== null) {
     stat.coutn = stat.count + 1;
   } else {
-    const newID = counter;
+    anID = counter;
     counter += 1;
-    siteStats[newID] = {
+    siteStats[anID] = {
       site: req.body.site,
-      id: newID,
+      id: anID,
       count: 1,
     };
+    siteNames[req.body.site] = anID;
   }
   return res.status(200).send();
 });
